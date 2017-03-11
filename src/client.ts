@@ -3,6 +3,8 @@ import * as readline from "readline";
 import * as streamreq from "request";
 import { RequestAPI, RequestResponse, UriOptions, UrlOptions } from "request";
 import * as request from "request-promise-native";
+import { Observable } from "rxjs/Observable";
+import { Observer } from "rxjs/Observer";
 import { Config } from "./config";
 
 export interface PortInfo {
@@ -52,10 +54,8 @@ export class Client {
     this.srq = this.srq.defaults(defaults);
   }
 
-  public getForwardedPorts(): Promise<PortInfo[]> {
-    return new Promise<PortInfo[]>(async (res, rej) => {
-      const portInfos: PortInfo[] = [];
-
+  public getForwardedPorts(): Observable<PortInfo> {
+    return Observable.create((observer: Observer<PortInfo>) => {
       const getPage = async (Page: number) => {
         this.srq.get("VirtualServerRpm.htm", { qs: { Page } }).on("response", (response) => {
           const rl = readline.createInterface({ input: response, terminal: false });
@@ -76,7 +76,7 @@ export class Client {
                 if (isEnd(line)) {
                   state = 2;
                 } else {
-                  portInfos.push(parsePortInfo(line));
+                  observer.next(parsePortInfo(line));
                 }
                 break;
 
@@ -90,11 +90,11 @@ export class Client {
                 break;
               case 4:
                 state = 5;
+                rl.close();
                 if (line.indexOf("1") >= 0) {
-                  rl.close();
                   getPage(Page + 1);
                 } else {
-                  res(portInfos);
+                  observer.complete();
                 }
                 break;
               default:

@@ -1,3 +1,4 @@
+import { Observable } from "rxjs/Observable";
 import { Config } from "./config";
 export interface PortInfo {
     servicePortFrom: number;
@@ -19,6 +20,6 @@ export declare class Client {
     private srq;
     constructor(config: Config);
     login(): Promise<void>;
-    getForwardedPorts(): Promise<PortInfo[]>;
+    getForwardedPorts(): Observable<PortInfo>;
     private encryptAuth();
 }
