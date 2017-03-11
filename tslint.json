@@ -1,3 +1,8 @@
 {
-  "extends": "tslint:latest"
+  "extends": "tslint:latest",
+  "rules": {
+    "interface-name": [true, "never-prefix"],
+    "trailing-comma": [true, {"multiline": "never", "singleline": "never"}],
+    "no-console": [false]
+  }
 }
