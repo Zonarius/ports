@@ -1,22 +1,21 @@
-import * as request from "request-promise-native";
-import * as Config from "./config";
+import { Client } from "./client";
+import { Config, readConfig } from "./config";
 
 async function main() {
-    const config = Config.readConfig();
-    const jar = request.jar();
+    const config = readConfig();
+    const client = new Client(config);
 
-    const rq = request.defaults({
-        baseUrl: config.url,
-        jar
-    });
+    await client.login();
 
-    const a = await rq.get("/userRpm/LoginRpm.htm", {
-        qs: {
-            Save: "Save",
-            ...config.auth
-        }
-    });
-    console.log(a);
+    console.log(JSON.stringify(await client.getForwardedPorts(), undefined, 2));
 }
 
-main().catch((err) => console.error("ERROR!", JSON.stringify(err, undefined, 2)));
+main().catch(errend);
+
+function errend(err: any) {
+    if (typeof err !== "string") {
+        err = JSON.stringify(err, undefined, 2);
+    }
+    console.error("ERROR!", err);
+    process.exitCode = 1;
+}
